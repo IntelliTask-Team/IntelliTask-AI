@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const router = require("express").Router();
 
 const Project = require("../models/Project.model");
+const Task = require("../models/Task.model");
 
 // ***** POST /api/projects  - TO CREATE NEW PROJECT IN DATABASE *****
 router.post("/projects", (req, res, next) => {
@@ -9,7 +10,7 @@ router.post("/projects", (req, res, next) => {
 
   const newProject = {
     title,
-    description
+    description,
   };
 
   Project.create(newProject)
@@ -69,7 +70,7 @@ router.put("/projects/:projectId", (req, res, next) => {
 
   const newDetails = {
     title: req.body.title,
-    description: req.body.description
+    description: req.body.description,
   };
 
   Project.findByIdAndUpdate(projectId, newDetails, { new: true })
@@ -91,12 +92,16 @@ router.delete("/projects/:projectId", (req, res, next) => {
     return;
   }
 
-  Project.findByIdAndRemove(projectId)
-    .then(() =>
+
+  Task.deleteMany({ project: projectId }) // deleting all the tasks attached to the project
+    .then(() => {
+      return Project.findByIdAndRemove(projectId); // deleting the actual project
+    })
+    .then(() => {
       res.json({
-        message: `Project with ${projectId} is removed successfully.`,
-      })
-    )
+        message: `Project with ${projectId} and its tasks are removed successfully.`,
+      });
+    })
     .catch((err) => {
       res.status(500).json({
         message: "Error deleting project",
