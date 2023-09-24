@@ -26,16 +26,19 @@ router.post("/projects", (req, res, next) => {
 
 // ***** GET /api/projects - TO DISPLAY ALL PROJECTS - RETRIEVE ALL PROJECTS FROM DATABASE *****
 router.get("/projects", (req, res, next) => {
-  Project.find()
-    .populate("tasks")
-    .then((allProjects) => res.json(allProjects))
-    .catch((err) => {
-      console.log("Error getting all projects...", err);
-      res.status(500).json({
-        message: "Error getting all projects",
-        error: err,
-      });
-    });
+    Project.find()
+        .populate({
+            path: 'tasks',
+            options: { sort: { 'order': 1 } } 
+        })
+        .then((allProjects) => res.json(allProjects))
+        .catch((err) => {
+            console.log("Error getting all projects...", err);
+            res.status(500).json({
+                message: "Error getting all projects",
+                error: err,
+            });
+        });
 });
 
 // ***** GET /api/projects/:projectId  - TO DISPLAY DETAILS OF A PROJECT - RETRIEVE PROJECT FROM DATABASE BY ID *****
@@ -43,20 +46,23 @@ router.get("/projects/:projectId", (req, res, next) => {
   const { projectId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(projectId)) {
-    res.status(400).json({ message: "ID is not valid" });
-    return;
+      res.status(400).json({ message: "ID is not valid" });
+      return;
   }
-  //Note: testing if tasks are not needed to be linked to projects
+
   Project.findById(projectId)
-    .populate("tasks")
-    .then((project) => res.json(project))
-    .catch((err) => {
-      console.log("An error occurred", err);
-      res.status(500).json({
-        message: "Error getting project details",
-        error: err,
+      .populate({
+          path: 'tasks',
+          options: { sort: { 'order': 1 } } 
+      })
+      .then((project) => res.json(project))
+      .catch((err) => {
+          console.log("An error occurred", err);
+          res.status(500).json({
+              message: "Error getting project details",
+              error: err,
+          });
       });
-    });
 });
 
 // ***** PUT /api/projects/:projectId  - TO UPDATE A PROJECT BY ID *****

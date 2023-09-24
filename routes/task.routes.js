@@ -6,10 +6,9 @@ const Project = require("../models/Project.model");
 
 // ***** POST /api/:projectId/tasks  - TO CREATE NEW TASK IN DATABASE *****
 router.post("/:projectId/tasks", (req, res, next) => {
-  const { description } = req.body;
+  const { description, order } = req.body; 
   const { projectId } = req.params;
-
-  const newTask = { description, project: projectId };
+  const newTask = { description, order, project: projectId }; 
 
   Task.create(newTask)
     .then((newTask) => {
@@ -35,12 +34,21 @@ router.delete("/tasks/:taskId", (req, res, next) => {
     res.status(400).json({ message: "ID is not valid" });
     return;
   }
-  Task.findOneAndDelete({ _id: taskId })
-    .then((task) => {
-      return Project.findByIdAndUpdate(task.project, {
-        $pull: { tasks: taskId },
-      });
-    })
+  let taskProjectId;
+Task.findOneAndDelete({ _id: taskId })
+.then((task) => {
+  // update order in backend after deleting task
+  taskProjectId = task.project;
+  return Task.updateMany(
+    { order: { $gt: task.order } },
+    { $inc: { order: -1 } }
+  );
+})
+.then(() => {
+  return Project.findByIdAndUpdate(taskProjectId, {
+    $pull: { tasks: taskId },
+  });
+})
     .then(() => {
       res.json({
         message: `Task with ${taskId} is removed successfully from database & projectlist.`,
@@ -57,6 +65,29 @@ router.delete("/tasks/:taskId", (req, res, next) => {
           error: err,
         });
       }
+    });
+});
+
+// PUT /api/tasks/reorder - TO REORDER TASKS
+router.put("/tasks/reorder", (req, res, next) => {
+  const { reorderedTasks } = req.body;
+
+  const updatePromises = [];
+
+  reorderedTasks.forEach((task, index) => {
+    updatePromises.push(Task.findByIdAndUpdate(task._id, { order: index }));
+  });
+
+  Promise.all(updatePromises)
+    .then(() => {
+      res.status(200).json({ message: 'Tasks reordered successfully.' });
+    })
+    .catch((error) => {
+      console.log("Error reordering tasks...", error);
+      res.status(500).json({
+        message: "Error reordering tasks",
+        error: error,
+      });
     });
 });
 
