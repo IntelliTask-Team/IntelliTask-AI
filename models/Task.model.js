@@ -7,6 +7,10 @@ const taskSchema = new Schema(
       type: String,
       required: true,
     },
+    order: {
+      type: Number,
+      required: true,
+    },
     project: { type: Schema.Types.ObjectId, ref: "Project" },
   },
   {
