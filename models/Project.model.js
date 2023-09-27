@@ -13,6 +13,8 @@ const projectSchema = new Schema(
     },
     tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     ai: String,
+    user: { type: Schema.Types.ObjectId, ref: "User" },
+    demo: { type: Boolean, default: false }, 
   },
   {
     timestamps: true,
