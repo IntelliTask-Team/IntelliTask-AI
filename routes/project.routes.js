@@ -11,6 +11,7 @@ router.post("/projects", (req, res, next) => {
   const newProject = {
     title,
     description,
+    user: req.payload._id,
   };
 
   Project.create(newProject)
@@ -26,7 +27,7 @@ router.post("/projects", (req, res, next) => {
 
 // ***** GET /api/projects - TO DISPLAY ALL PROJECTS - RETRIEVE ALL PROJECTS FROM DATABASE *****
 router.get("/projects", (req, res, next) => {
-    Project.find()
+    Project.find({ user: req.payload._id })
         .populate({
             path: 'tasks',
             options: { sort: { 'order': 1 } } 
