@@ -48,7 +48,7 @@ router.post("/signup", (req, res, next) => {
     .then((foundUser) => {
       // If the user with the same email already exists, send an error response
       if (foundUser) {
-        res.status(400).json({ message: "User already exists." });
+        res.status(400).json({ message: "That user already exists." });
         return;
       }
 
@@ -80,7 +80,7 @@ router.post("/login", (req, res, next) => {
 
   // Check if email or password are provided as empty string
   if (email === "" || password === "") {
-    res.status(400).json({ message: "Provide email and password." });
+    res.status(400).json({ message: "Provide an email and a password." });
     return;
   }
 
