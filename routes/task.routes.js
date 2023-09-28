@@ -79,14 +79,32 @@ router.put("/tasks/reorder", (req, res, next) => {
   });
 
   Promise.all(updatePromises)
-    .then(() => {
-      res.status(200).json({ message: 'Tasks reordered successfully.' });
-    })
     .catch((error) => {
       console.log("Error reordering tasks...", error);
       res.status(500).json({
         message: "Error reordering tasks",
         error: error,
+      });
+    });
+});
+
+// ***** PUT /api/tasks/:taskId - TO UPDATE A TASK BY ID *****
+router.put("/tasks/:taskId", (req, res, next) => {
+  const { taskId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(taskId)) {
+    res.status(400).json({ message: "ID is not valid" });
+    return;
+  }
+
+  const updatedFields = req.body;
+
+  Task.findByIdAndUpdate(taskId, updatedFields, { new: true })
+    .then((updatedTask) => res.json(updatedTask))
+    .catch((err) => {
+      res.status(500).json({
+        message: "Error updating task",
+        error: err,
       });
     });
 });
