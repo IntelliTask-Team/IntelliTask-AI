@@ -66,7 +66,7 @@ mongoose
   .connect(MONGO_URI)
   .then((x) => {
     console.log(`Connected to Mongo database: "${x.connections[0].name}"`);
-    // return mongoose.connection.dropDatabase();  // Comment out this line
+    return mongoose.connection.dropDatabase(); // Comment out this line
   })
   // .then(() => {                              // Comment out this block
   //   console.log("Database cleaned");
